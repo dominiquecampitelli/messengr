@@ -1,95 +1,73 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
+
+interface ChatMessage {
+  id: string;
+  content: string;
+}
+
+let socket: Socket;
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+ const [messages, setMessages] = useState<string[]>([]);
+  const [input, setInput] = useState("");
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  useEffect(() => {
+    socket = io("http://localhost:3002");
+
+    socket.on("message", (msg: string) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    socket.on("user-joined", (data: { message: string }) => {
+      setMessages((prev) => [...prev, data.message]);
+    });
+
+    socket.on("user-left", (data: { message: string }) => {
+      setMessages((prev) => [...prev, data.message]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+   const sendMessage = () => {
+    if (input.trim()) {
+      socket.emit("newMessage", input);
+      setInput("");
+    }
+  };
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>Chat Terra</h1>
+
+      <div
+        style={{
+          border: "1px solid #ccc",
+          padding: 10,
+          height: "300px",
+          overflowY: "scroll",
+          marginBottom: 10,
+        }}
+      >
+        {messages.map((msg, i) => (
+          <div key={i}>{msg}</div>
+        ))}
+      </div>
+
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Digite sua mensagem..."
+        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        style={{ width: "80%", marginRight: 10 }}
+      />
+      <button onClick={sendMessage}>Enviar</button>
     </div>
   );
 }
