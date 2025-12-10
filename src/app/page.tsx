@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { io, Socket } from "socket.io-client";
+
+import friendProfile from "../assets/images/rubber-ducky.png";
+import myProfile from "../assets/images/friendly-dog.png";
 
 interface ChatMessage {
   id: string;
@@ -11,7 +15,7 @@ interface ChatMessage {
 let socket: Socket;
 
 export default function Home() {
- const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState("");
 
   useEffect(() => {
@@ -34,7 +38,7 @@ export default function Home() {
     };
   }, []);
 
-   const sendMessage = () => {
+  const sendMessage = () => {
     if (input.trim()) {
       socket.emit("newMessage", input);
       setInput("");
@@ -42,32 +46,44 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Chat Terra</h1>
-
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: 10,
-          height: "300px",
-          overflowY: "scroll",
-          marginBottom: 10,
-        }}
-      >
-        {messages.map((msg, i) => (
-          <div key={i}>{msg}</div>
-        ))}
+    <div className="bg-zinc-500 w-full h-screen flex flex-row p-8 md:p-24 gap-8">
+      <div className="flex flex-col flex-none justify-between">
+        <div className="p-[8px] bg-gradient-to-t from-lime-500 to-transparent rounded-lg w-fit border border-lime-600">
+          <Image
+            src={friendProfile}
+            alt="Foto de perfil"
+            width={100}
+            height={100}
+            className="rounded-md border border-lime-600"
+          />
+        </div>
+        <div className="p-[8px] bg-gradient-to-t from-lime-500 to-transparent rounded-lg w-fit">
+          <Image
+            src={myProfile}
+            alt="Foto de perfil"
+            width={100}
+            height={100}
+            className="rounded-md"
+          />
+        </div>
       </div>
-
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Digite sua mensagem..."
-        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        style={{ width: "80%", marginRight: 10 }}
-      />
-      <button onClick={sendMessage}>Enviar</button>
+      <div className="flex flex-col flex-1 gap-2">
+        <div className="flex-[0.7] bg-white border border-gray-300 p-3 overflow-y-auto rounded-sm">
+          {messages.map((msg, i) => (
+            <div key={i}>{msg}</div>
+          ))}
+        </div>
+        <div className="flex flex-[0.3]">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Digite sua mensagem..."
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              className="w-full h-full bg-white text-black rounded-sm pl-3 pr-20"
+            />
+        </div>
+      </div>
     </div>
   );
 }
