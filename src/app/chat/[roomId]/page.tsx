@@ -27,6 +27,7 @@ interface ChatMessage {
 export default function Home() {
   const socketRef = useRef<Socket | null>(null);
   const userNameRef = useRef<string>("");
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const [userName, setUserName] = useState<string>("");
   const [otherUserName, setOtherUserName] = useState<string | null>(null);
@@ -121,6 +122,12 @@ export default function Home() {
 
     socketRef.current.emit("join", { roomId: String(roomId), userName });
   }, [roomId, userName, roomFull]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
 
   const sendMessage = () => {
     if (!input.trim() || !socketRef.current) return;
@@ -245,33 +252,34 @@ export default function Home() {
                 />
               </div>
             </div>
-            <div className="flex flex-col flex-1 gap-4">
+            <div className="flex flex-col flex-1">
               <h1
-                className="mb-5 text-lg font-medium text-black"
+                className="mb-8 text-lg font-medium text-black"
                 style={{
                   textShadow: "0 0 5px rgba(255,255,255,0.9)",
                 }}
               >
                 {otherUserName ?? "Aguardando usuário..."}
               </h1>
-              <div className="flex-[0.7] bg-white overflow-y-auto rounded-sm text-base text-black">
+              <div className="flex-[0.7] bg-white overflow-y-auto rounded-sm text-base text-black mb-2">
                 {messages.map((msg, i) => (
                   <div key={i} className="mb-4">
                     <p className="text-base font-medium text-stone-500">
                       {msg.user}:
                     </p>
-                    <p className="text-base font-medium text-black pl-4">
+                    <p className="text-base font-medium text-black pl-4 break-all whitespace-pre-wrap">
                       {msg.message}
                     </p>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
               {isOtherTyping && (
-                <p className="text-sm italic text-stone-500 mt-2">
+                <p className="text-sm italic text-stone-500">
                   {otherUserName} está digitando...
                 </p>
               )}
-              <div className="flex flex-[0.3]">
+              <div className="flex flex-[0.3] mt-2">
                 <textarea
                   value={input}
                   placeholder="Digite sua mensagem..."
