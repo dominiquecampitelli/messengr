@@ -9,8 +9,9 @@ import { UserModal } from "../../../components/modal/newUser";
 import { RoomFull } from "../../../components/modal/roomFull";
 import { Toast } from "../../../components/toast";
 
-import banner from "../../../assets/images/graffiti-wlm.jpg";
-import friendProfile from "../../../assets/images/skateboarder.png";
+import bannerMyProfile from "../../../assets/images/bamboo-wlm.jpg";
+import bannerOtherProfile from "../../../assets/images/graffiti-wlm.jpg";
+import otherProfile from "../../../assets/images/skateboarder.png";
 import myProfile from "../../../assets/images/friendly-dog.png";
 
 interface StatusPayload {
@@ -34,6 +35,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [roomFull, setRoomFull] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isFirstUser, setIsFirstUser] = useState<boolean | null>(null);
 
   const params = useParams<{ roomId: string | string[] }>();
 
@@ -51,8 +53,11 @@ export default function Home() {
 
     socket.on("room-state", ({ users }: { users: string[] }) => {
       const self = userNameRef.current;
-      const other = users.find((u) => u !== self);
+      if (!self) return;
 
+      setIsFirstUser(users[0] === self);
+
+      const other = users.find((u) => u !== self);
       if (other) {
         setOtherUserName(other);
         setIsOtherUserOnline(true);
@@ -172,7 +177,13 @@ export default function Home() {
         <div className="relative w-full h-screen overflow-hidden bg-white">
           <div className="absolute top-0 left-0 w-full h-[155px] z-0">
             <Image
-              src={banner}
+              src={
+                isFirstUser === null
+                  ? bannerOtherProfile
+                  : isFirstUser
+                    ? bannerOtherProfile
+                    : bannerMyProfile
+              }
               alt="Banner"
               fill
               className="object-cover pointer-events-none"
@@ -195,12 +206,18 @@ export default function Home() {
               <div
                 className={`p-[8px] rounded-lg w-fit border bg-gradient-to-t ${
                   isOtherUserOnline
-                    ? "from-lime-500 to-transparent  border-lime-600"
-                    : "from-stone-500 to-transparent  border-stone-600"
+                    ? "from-lime-500 to-transparent border-lime-600"
+                    : "from-stone-500 to-transparent border-stone-600"
                 }`}
               >
                 <Image
-                  src={friendProfile}
+                  src={
+                    isFirstUser === null
+                      ? otherProfile
+                      : isFirstUser
+                        ? otherProfile
+                        : myProfile
+                  }
                   alt="Foto de perfil"
                   width={100}
                   height={100}
@@ -211,7 +228,13 @@ export default function Home() {
               </div>
               <div className="p-[8px] rounded-lg w-fit border bg-gradient-to-t from-lime-500 to-transparent border-lime-600">
                 <Image
-                  src={myProfile}
+                  src={
+                    isFirstUser === null
+                      ? myProfile
+                      : isFirstUser
+                        ? myProfile
+                        : otherProfile
+                  }
                   alt="Foto de perfil"
                   width={100}
                   height={100}
