@@ -36,6 +36,9 @@ export default function Home() {
   const [roomFull, setRoomFull] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isFirstUser, setIsFirstUser] = useState<boolean | null>(null);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
 
   const params = useParams<{ roomId: string | string[] }>();
 
@@ -55,50 +58,49 @@ export default function Home() {
       const self = userNameRef.current;
       if (!self) return;
 
+      setHasJoinedRoom(true);
+
       setIsFirstUser(users[0] === self);
 
-      const other = users.find((u) => u !== self);
-      if (other) {
-        setOtherUserName(other);
-        setIsOtherUserOnline(true);
-      }
+      const other = users.find((u) => u !== self) ?? null;
+
+      setOtherUserName(other);
+      setIsOtherUserOnline(Boolean(other));
     });
 
     socket.on("chat-message", (payload: ChatMessage) => {
-      if (payload.user !== userName && !otherUserName) {
-        setOtherUserName(payload.user);
-      }
-
       setMessages((prev) => [...prev, payload]);
     });
 
     socket.on("user-joined", (payload: StatusPayload) => {
-      if (payload.user !== userName) {
-        setOtherUserName(payload.user);
-        setIsOtherUserOnline(true);
-      }
+      if (payload.user === userNameRef.current) return;
+
+      setOtherUserName(payload.user);
+      setIsOtherUserOnline(true);
 
       setMessages((prev) => [
         ...prev,
-        {
-          user: payload.user,
-          message: "entrou no chat",
-        },
+        { user: payload.user, message: "entrou no chat" },
       ]);
     });
 
+    socket.on("typing", () => {
+      setIsOtherTyping(true);
+    });
+
+    socket.on("stop-typing", () => {
+      setIsOtherTyping(false);
+    });
+
     socket.on("user-left", (payload: StatusPayload) => {
-      if (payload.user === otherUserName) {
-        setOtherUserName(null);
-        setIsOtherUserOnline(false);
-      }
+      if (payload.user !== otherUserName) return;
+
+      setOtherUserName(null);
+      setIsOtherUserOnline(false);
 
       setMessages((prev) => [
         ...prev,
-        {
-          user: payload.user,
-          message: "saiu do chat",
-        },
+        { user: payload.user, message: "saiu do chat" },
       ]);
     });
 
@@ -124,6 +126,7 @@ export default function Home() {
     if (!input.trim() || !socketRef.current) return;
 
     socketRef.current.emit("newMessage", input);
+    socketRef.current.emit("stop-typing");
     setInput("");
   };
 
@@ -263,13 +266,32 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+              {isOtherTyping && (
+                <p className="text-sm italic text-stone-500 mt-2">
+                  {otherUserName} está digitando...
+                </p>
+              )}
               <div className="flex flex-[0.3]">
                 <textarea
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
                   placeholder="Digite sua mensagem..."
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   className="w-full h-full bg-white border border-gray-300 text-base text-black rounded-sm p-3 py-2 resize-none"
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+
+                    if (!socketRef.current || !hasJoinedRoom) return;
+
+                    socketRef.current.emit("typing");
+
+                    if (typingTimeout.current) {
+                      clearTimeout(typingTimeout.current);
+                    }
+
+                    typingTimeout.current = setTimeout(() => {
+                      socketRef.current?.emit("stop-typing");
+                    }, 800);
+                  }}
                 />
               </div>
             </div>
