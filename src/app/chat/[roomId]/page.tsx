@@ -185,7 +185,7 @@ export default function Home() {
 
       {!roomFull && userName && (
         <div className="relative w-full h-screen overflow-hidden bg-white">
-          <div className="absolute top-0 left-0 w-full h-[155px] z-0">
+          <div className="absolute top-0 left-0 w-full h-36 md:h-[155px] z-0">
             <Image
               src={
                 isFirstUser === null
@@ -204,17 +204,17 @@ export default function Home() {
             <div className="absolute top-4 right-6 z-30 pointer-events-none">
               <button
                 onClick={shareRoom}
-                className="pointer-events-auto px-2 py-1 border rounded-sm bg-lime-600/90 backdrop-blur text-white hover:bg-lime-700 transition shadow-md"
+                className="pointer-events-auto px-2 py-1 border rounded-sm bg-lime-600/90 backdrop-blur text-white text-md md:text-lg hover:bg-lime-700 transition shadow-md"
               >
                 Compartilhar sala
               </button>
             </div>
           )}
           <div className="absolute bottom-0 left-0 w-full h-[220px] z-0 bg-gradient-to-t from-stone-300 to-transparent" />
-          <div className="relative z-10 w-full h-full flex flex-row p-8 md:p-24 gap-9">
-            <div className="flex flex-col flex-none justify-between">
+          <div className="relative z-10 w-full h-full flex flex-col gap-4 p-4 md:flex-row md:gap-9 md:p-24">
+            <div className="flex flex-col md:flex-col flex-none md:justify-between">
               <div
-                className={`p-[8px] rounded-lg w-fit border bg-gradient-to-t ${
+                className={`p-1 md:p-2 rounded-lg w-fit border bg-gradient-to-t ${
                   isOtherUserOnline
                     ? "from-lime-500 to-transparent border-lime-600"
                     : "from-stone-500 to-transparent border-stone-600"
@@ -229,14 +229,12 @@ export default function Home() {
                         : myProfile
                   }
                   alt="Foto de perfil"
-                  width={100}
-                  height={100}
-                  className={`rounded-md border ${
+                  className={`w-16 h-16 md:w-28 md:h-28 rounded-md border ${
                     isOtherUserOnline ? " border-lime-600" : " border-stone-600"
                   }`}
                 />
               </div>
-              <div className="p-[8px] rounded-lg w-fit border bg-gradient-to-t from-lime-500 to-transparent border-lime-600">
+              <div className="hidden md:block md:p-2 rounded-lg w-fit border bg-gradient-to-t from-lime-500 to-transparent border-lime-600">
                 <Image
                   src={
                     isFirstUser === null
@@ -246,15 +244,13 @@ export default function Home() {
                         : otherProfile
                   }
                   alt="Foto de perfil"
-                  width={100}
-                  height={100}
-                  className="rounded-md border border-lime-600"
+                  className="md:w-28 md:h-28 rounded-md border border-lime-600"
                 />
               </div>
             </div>
             <div className="flex flex-col flex-1">
               <h1
-                className="mb-8 text-lg font-medium text-black"
+                className="mb-8 text-lg md:text-xl font-medium text-black"
                 style={{
                   textShadow: "0 0 5px rgba(255,255,255,0.9)",
                 }}

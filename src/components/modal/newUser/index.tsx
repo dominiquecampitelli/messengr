@@ -23,9 +23,10 @@ export function UserModal({ onSubmit }: UserModalProps) {
 
         <input
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 rounded p-2 mb-4 text-black"
           placeholder="Seu nome"
+          className="w-full border border-gray-300 rounded p-2 mb-4 text-black"
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          onChange={(e) => setName(e.target.value)}
         />
 
         <button
