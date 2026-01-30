@@ -47,7 +47,7 @@ export default function Home() {
     typeof params.roomId === "string" ? params.roomId : params.roomId?.[0];
 
   useEffect(() => {
-    const socket = io("http://localhost:3002", { autoConnect: false });
+    const socket = io("https://messengr-server.onrender.com", { autoConnect: false });
     socketRef.current = socket;
 
     socket.on("room-full", () => {
