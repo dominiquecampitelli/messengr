@@ -11,4 +11,5 @@ npm install
 npm run dev
 ```
 
-O projeto carregará em [Local]http://localhost:3001 ou [Network](http://192.168.15.8:3001).
+
+O projeto carregará em local http://localhost:3001 ou network http://192.168.15.8:3001.
